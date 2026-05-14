@@ -21,7 +21,6 @@ from src.config import Profile
 from src.filters import apply_filters
 from src.models import Country, JobBase, ScoreComponent, ScoreResult
 
-
 # ─── Helpers de matching ─────────────────────────────────────────────────
 
 

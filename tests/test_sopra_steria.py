@@ -184,7 +184,7 @@ def test_skips_non_belgium_links(cfg, repo):
     )
     SopraSteriaScraper(cfg, repo=repo).run()
     jobs = repo.get_recent_jobs(only_active=True)
-    assert all("9999" != j.external_id for j in jobs)
+    assert all(j.external_id != "9999" for j in jobs)
     assert all("paris" not in j.location.lower() for j in jobs)
 
 
@@ -200,7 +200,7 @@ def test_detail_fetch_failure_keeps_listing_description(cfg, repo):
     respx.get("https://careers.soprasteria.be/job/kyc-officer-in-brussels-belgium-jid-1640").mock(
         return_value=httpx.Response(200, text=JSONLD_DETAIL_KYC)
     )
-    result = SopraSteriaScraper(cfg, repo=repo).run()
+    SopraSteriaScraper(cfg, repo=repo).run()
     # Le 404 fait remonter une erreur mais le run continue
     jobs = repo.get_recent_jobs(only_active=True)
     by_id = {j.external_id: j for j in jobs}

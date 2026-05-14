@@ -23,7 +23,6 @@ from loguru import logger
 from src.models import Country, JobBase, JobSource
 from src.scrapers.base import BaseScraper, ScrapeError
 
-
 _DEFAULT_COMPANY = "Orange Cyberdefense"
 _DETAIL_SELECTORS: tuple[str, ...] = (
     "main article",
@@ -94,7 +93,7 @@ class OrangeCyberdefenseScraper(BaseScraper):
             location: str | None = None
             for el in link.find_all(["span", "div"], limit=20):
                 text = el.get_text(strip=True)
-                if any(c in text.lower() for c in _BE_CITIES + ("belgium", "luxembourg")):
+                if any(c in text.lower() for c in (*_BE_CITIES, "belgium", "luxembourg")):
                     location = text[:80]
                     break
 

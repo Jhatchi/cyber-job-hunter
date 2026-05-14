@@ -47,12 +47,35 @@ select = [
     "S",             # bandit (sécurité)
 ]
 ignore = [
-    "S101",  # assert utilisé (ok dans les tests)
+    "S101",     # assert used (ok in tests)
     "PLR0913",  # too many arguments
+    "PLR2004",  # magic values: HTTP status codes (200/429/500) and UI thresholds are not defects
+    "RUF002",   # ambiguous unicode in docstrings: FR characters are intentional
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["S", "PLR2004"]
+"tests/**/*.py" = [
+    "S",        # bandit: test code uses fixtures, not prod paths
+    "PLR2004",  # magic values: tests compare to literal values
+    "E501",     # long lines: HTML/JSON fixtures are legitimately long
+    "PLC0415",  # local imports: tests use lazy imports for clarity
+    "RUF001",   # ambiguous unicode in strings (FR fixtures)
+    "RUF002",   # ambiguous unicode in docstrings (FR comments)
+    "RUF003",   # ambiguous unicode in comments
+]
+"dashboard/**/*.py" = [
+    "E501",     # long lines: aligned dict tables and Streamlit markdown
+    "PLC0415",  # local imports common in Streamlit views
+    "PLR0912",  # too many branches: dashboard loaders fan out per filter
+]
+"scripts/**/*.py" = [
+    "PLR0912",  # too many branches: orchestrator dispatches per source
+    "PLR0915",  # too many statements: orchestrator setup is sequential
+]
+
+[tool.ruff.lint.pylint]
+max-branches = 18
+max-statements = 60
 
 # ─── Mypy ────────────────────────────────────────────────
 [tool.mypy]
@@ -67,6 +90,14 @@ plugins = ["pydantic.mypy"]
 [[tool.mypy.overrides]]
 module = ["feedparser.*", "hishel.*"]
 ignore_missing_imports = true
+
+# SQLModel/SQLAlchemy and BeautifulSoup4 have known typing limitations:
+# - Field comparisons return bool to mypy instead of ColumnElement[bool]
+# - AttributeValueList from bs4 is not narrowed to str by mypy
+# Strict typing is kept for the core (scoring, filters, models, config, deduplication).
+[[tool.mypy.overrides]]
+module = ["src.storage", "src.scrapers.*"]
+disable_error_code = ["arg-type", "attr-defined", "union-attr"]
 
 # ─── Pytest ──────────────────────────────────────────────
 [tool.pytest.ini_options]

@@ -26,7 +26,6 @@ from loguru import logger
 from src.models import Country, JobBase, JobSource
 from src.scrapers.base import BaseScraper, ScrapeError
 
-
 _DEFAULT_COMPANY = "Service Public Fédéral (BE)"
 _DEFAULT_LOCATION = "Brussels"  # majorité des sièges fédéraux
 _DETAIL_SELECTORS: tuple[str, ...] = (

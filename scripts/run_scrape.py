@@ -16,7 +16,7 @@ Sortie console :
 from __future__ import annotations
 
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 # Permet de lancer le script sans installer le package
@@ -66,7 +66,7 @@ def main(sources_filter: str | None, db_url: str | None, no_score: bool, dry_run
     else:
         logger.warning("--dry-run : aucune écriture en DB.")
 
-    run_started = datetime.now(timezone.utc)
+    run_started = datetime.now(UTC)
     summaries: list[dict[str, object]] = []
 
     for name, src_cfg in sources.items():
@@ -118,7 +118,7 @@ def main(sources_filter: str | None, db_url: str | None, no_score: bool, dry_run
         # Persiste un résumé du run pour la détection "nouvelles offres" (Sprint 2)
         run_record = ScrapeRun(
             started_at=run_started,
-            finished_at=datetime.now(timezone.utc),
+            finished_at=datetime.now(UTC),
             sources_run=[str(s["name"]) for s in summaries],
             jobs_fetched=sum(int(s["fetched"]) for s in summaries),  # type: ignore[arg-type]
             jobs_inserted=sum(int(s["inserted"]) for s in summaries),  # type: ignore[arg-type]

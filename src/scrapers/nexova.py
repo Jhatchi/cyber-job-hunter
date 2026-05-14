@@ -35,7 +35,6 @@ from src.scrapers.base import (
     extract_jobposting_jsonld,
 )
 
-
 _DEFAULT_COMPANY = "Nexova Group"
 _BASE_HOST = "https://www.nexovagroup.eu"
 _DETAIL_FALLBACK_SELECTORS: tuple[str, ...] = (
@@ -141,7 +140,7 @@ class NexovaScraper(BaseScraper):
         for job in jobs:
             try:
                 response = self._http_get(job.url)
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.debug(
                     "[{}] detail fetch failed for {}: {}", self.name, job.external_id, e
                 )
@@ -177,7 +176,8 @@ class NexovaScraper(BaseScraper):
             # Fallback HTML — sélecteurs propres au CMS Nexova
             try:
                 detail_soup = BeautifulSoup(response.text, "lxml")
-            except Exception:  # noqa: BLE001
+            except Exception as exc:
+                logger.debug("nexova: failed to parse detail HTML, skipping: {}", exc)
                 continue
             for sel in _DETAIL_FALLBACK_SELECTORS:
                 el = detail_soup.select_one(sel)

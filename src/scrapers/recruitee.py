@@ -29,7 +29,6 @@ from src.models import Country, JobBase, JobSource
 from src.scrapers.base import BaseScraper, ScrapeError
 from src.scrapers.remotive import _strip_html  # réutilisable, identique
 
-
 _COUNTRY_CODE_MAP: dict[str, Country] = {
     "BE": Country.BE,
     "LU": Country.LU,
@@ -72,7 +71,7 @@ class RecruiteeScraper(BaseScraper):
         super().__init__(config, **kwargs)
         # Override la ClassVar par une instance var (seulement pour CETTE instance)
         self.source = source  # type: ignore[misc]
-        self.name = source.value
+        self.name = source.value  # type: ignore[misc]
         self._company_name = company_name or config.company_name_override
 
     def fetch_jobs(self, page: int) -> tuple[Iterable[JobBase], bool]:

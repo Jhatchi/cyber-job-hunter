@@ -45,7 +45,6 @@ from loguru import logger
 from src.models import Country, JobBase, JobSource
 from src.scrapers.base import BaseScraper, ScrapeError, clean_html_to_text
 
-
 _DEFAULT_COMPANY = "Devoteam"
 _PAGE_SIZE = 15
 # Auth Basic publique (visible dans le bundle JS Devoteam — pas un secret).
@@ -92,7 +91,8 @@ def _country_from_address(addresses: list[str]) -> tuple[Country, str | None]:
     if country.value in city.lower() or len(city) > 60:
         words = cleaned.replace(country.value.title(), "").split()
         if words:
-            city = words[-1] if not words[-1].isdigit() else (words[-2] if len(words) > 1 else words[-1])
+            last = words[-1]
+            city = words[-2] if last.isdigit() and len(words) > 1 else last
     return country, city or None
 
 
@@ -121,7 +121,7 @@ class DevoteamScraper(BaseScraper):
             response = self._client.get(
                 self.config.base_url, params=params, headers=_API_HEADERS
             )
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             raise ScrapeError(f"Devoteam API request failed: {e}") from e
 
         if not (200 <= response.status_code < 300):
@@ -170,9 +170,12 @@ class DevoteamScraper(BaseScraper):
         qualifications_html = job.get("qualifications") or ""
         responsibilities_html = job.get("responsibilities") or ""
 
-        full_desc = "\n\n".join(
-            _strip_html(s) for s in (description_html, qualifications_html, responsibilities_html) if s
-        ) or _strip_html(item.get("jobSummary") or "") or title
+        sections = (description_html, qualifications_html, responsibilities_html)
+        full_desc = (
+            "\n\n".join(_strip_html(s) for s in sections if s)
+            or _strip_html(item.get("jobSummary") or "")
+            or title
+        )
 
         # URL canonique : applicationInfo.uris[0]
         app_info = job.get("applicationInfo") or {}

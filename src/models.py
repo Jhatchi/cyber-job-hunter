@@ -11,14 +11,14 @@ scrapers et les API sans dépendre de la couche DB.
 from __future__ import annotations
 
 import hashlib
+from datetime import UTC, datetime
 from datetime import date as Date
-from datetime import datetime, timezone
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field as PydField, HttpUrl, field_validator
+from pydantic import BaseModel, ConfigDict, HttpUrl, field_validator
+from pydantic import Field as PydField
 from sqlmodel import JSON, Column, Field, SQLModel, UniqueConstraint
-
 
 # ─── Enums ───────────────────────────────────────────────────────────────
 
@@ -138,9 +138,9 @@ class Job(JobBase, table=True):
         max_length=64,
         description="SHA-256 hex de title|company|location|description (normalisé)",
     )
-    first_seen_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    last_seen_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    scraped_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), index=True)
+    first_seen_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    last_seen_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    scraped_at: datetime = Field(default_factory=lambda: datetime.now(UTC), index=True)
     is_active: bool = Field(default=True, description="False si l'offre a disparu de la source")
 
     # Note: relation `scores` (1-N → ScoreResult) sera ajoutée dans `src/storage.py`
@@ -194,7 +194,7 @@ class ScoreResult(ScoreResultBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     job_id: int = Field(foreign_key="job.id", index=True)
     computed_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc), index=True
+        default_factory=lambda: datetime.now(UTC), index=True
     )
 
 

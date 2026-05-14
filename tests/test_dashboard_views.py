@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime
 
 import pandas as pd
 
@@ -18,7 +18,7 @@ from dashboard.views.stats import (
 
 def _row(score=50, source="nviso", country="BE", is_rejected=False,
          matched_keywords=None, rejection_reasons=None) -> JobRow:  # type: ignore[no-untyped-def]
-    base = datetime.now(timezone.utc)
+    base = datetime.now(UTC)
     return JobRow(
         id=1, source=source, company="C", title="T", location="L",
         country=country, url="https://x.test", description="", score=score,

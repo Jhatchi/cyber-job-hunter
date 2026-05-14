@@ -11,7 +11,7 @@ Usage typique :
 from __future__ import annotations
 
 import csv
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from sqlalchemy import and_
@@ -52,7 +52,7 @@ class JobRepository:
         return Session(self.engine)
 
     def upsert_job(self, incoming: JobBase) -> tuple[Job, bool]:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         with self.session() as session:
             stmt = select(Job).where(
@@ -104,19 +104,19 @@ class JobRepository:
             stmt = (
                 select(ScoreResult)
                 .where(ScoreResult.job_id == job_id)
-                .order_by(ScoreResult.computed_at.desc())  # type: ignore[union-attr]
+                .order_by(ScoreResult.computed_at.desc())
                 .limit(1)
             )
-            return _run(session, stmt).first()
+            return _run(session, stmt).first()  # type: ignore[no-any-return]
 
     def get_recent_jobs(
         self, since_hours: int = 24, min_score: int = 0, only_active: bool = True
     ) -> list[Job]:
-        cutoff = datetime.now(timezone.utc) - timedelta(hours=since_hours)
+        cutoff = datetime.now(UTC) - timedelta(hours=since_hours)
         with self.session() as session:
-            stmt = select(Job).where(Job.scraped_at >= cutoff)  # type: ignore[arg-type]
+            stmt = select(Job).where(Job.scraped_at >= cutoff)
             if only_active:
-                stmt = stmt.where(Job.is_active.is_(True))  # type: ignore[union-attr]
+                stmt = stmt.where(Job.is_active.is_(True))
             jobs = list(_run(session, stmt).all())
 
             if min_score <= 0:
@@ -133,7 +133,7 @@ class JobRepository:
 
     def get_new_jobs_since(self, since: datetime) -> list[Job]:
         with self.session() as session:
-            stmt = select(Job).where(Job.first_seen_at >= since)  # type: ignore[arg-type]
+            stmt = select(Job).where(Job.first_seen_at >= since)
             return list(_run(session, stmt).all())
 
     def count_jobs(self) -> int:
@@ -143,7 +143,7 @@ class JobRepository:
     def mark_inactive(self, source: JobSource, kept_external_ids: set[str]) -> int:
         with self.session() as session:
             stmt = select(Job).where(
-                and_(Job.source == source, Job.is_active.is_(True))  # type: ignore[union-attr]
+                and_(Job.source == source, Job.is_active.is_(True))
             )
             jobs = list(_run(session, stmt).all())
             count = 0
@@ -170,10 +170,10 @@ class JobRepository:
         with self.session() as session:
             stmt = (
                 select(ScrapeRun)
-                .order_by(ScrapeRun.started_at.desc())  # type: ignore[union-attr]
+                .order_by(ScrapeRun.started_at.desc())
                 .limit(1)
             )
-            return _run(session, stmt).first()
+            return _run(session, stmt).first()  # type: ignore[no-any-return]
 
     def get_previous_run(self) -> ScrapeRun | None:
         """L'avant-dernier run. None si moins de 2 runs en DB.
@@ -183,7 +183,7 @@ class JobRepository:
         with self.session() as session:
             stmt = (
                 select(ScrapeRun)
-                .order_by(ScrapeRun.started_at.desc())  # type: ignore[union-attr]
+                .order_by(ScrapeRun.started_at.desc())
                 .limit(2)
             )
             rows = list(_run(session, stmt).all())
@@ -202,7 +202,7 @@ class JobRepository:
         )
 
         with self.session() as session:
-            stmt = select(Job).where(Job.is_active.is_(True))  # type: ignore[union-attr]
+            stmt = select(Job).where(Job.is_active.is_(True))
             jobs = list(_run(session, stmt).all())
 
         rows_written = 0

@@ -14,13 +14,10 @@ from src.config import SourceConfig, SourceType
 from src.models import Country, JobBase, JobSource
 from src.scrapers.base import (
     BaseScraper,
-    BotDetectedError,
     CircuitOpenError,
-    ScrapeError,
     _CircuitBreaker,
 )
 from src.storage import JobRepository
-
 
 # ─── Fixtures ────────────────────────────────────────────────────────────
 

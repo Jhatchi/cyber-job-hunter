@@ -118,7 +118,7 @@ def test_run_skips_non_job_links(cfg, repo):
     respx.get("https://jobs.orangecyberdefense.com/jobs").mock(
         return_value=httpx.Response(200, text=HTML_FIXTURE)
     )
-    result = OrangeCyberdefenseScraper(cfg, repo=repo).run()
+    OrangeCyberdefenseScraper(cfg, repo=repo).run()
     # Verify we didn't import contact/department
     jobs = repo.get_recent_jobs(only_active=True)
     titles = {j.title for j in jobs}

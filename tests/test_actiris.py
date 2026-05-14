@@ -115,7 +115,7 @@ def test_run_full_flow(cfg, repo):
         ("999", "Sales Associate", "Anderlecht"),
     ):
         respx.get(
-            f"https://www.actiris.brussels/fr/citoyens/detail-offre-d-emploi/",
+            "https://www.actiris.brussels/fr/citoyens/detail-offre-d-emploi/",
             params={"reference": ref},
         ).mock(return_value=httpx.Response(200, text=_detail_html(ref, title, loc)))
 
@@ -133,7 +133,7 @@ def test_run_orders_by_lastmod_desc(cfg, repo):
     )
     for ref, title in (("1001", "T_NEWEST"), ("1000", "T_MID"), ("999", "T_OLDEST")):
         respx.get(
-            f"https://www.actiris.brussels/fr/citoyens/detail-offre-d-emploi/",
+            "https://www.actiris.brussels/fr/citoyens/detail-offre-d-emploi/",
             params={"reference": ref},
         ).mock(return_value=httpx.Response(200, text=_detail_html(ref, title, "Brussels")))
 
@@ -184,7 +184,7 @@ def test_run_pagination_caps_at_max_pages(cfg, repo):
     )
     for ref in ("1001", "1000", "999"):
         respx.get(
-            f"https://www.actiris.brussels/fr/citoyens/detail-offre-d-emploi/",
+            "https://www.actiris.brussels/fr/citoyens/detail-offre-d-emploi/",
             params={"reference": ref},
         ).mock(return_value=httpx.Response(200, text=_detail_html(ref, "T", "L")))
 
@@ -202,7 +202,7 @@ def test_run_skips_invalid_sitemap_entries(cfg, repo):
     )
     for ref in ("1001", "1000", "999"):
         respx.get(
-            f"https://www.actiris.brussels/fr/citoyens/detail-offre-d-emploi/",
+            "https://www.actiris.brussels/fr/citoyens/detail-offre-d-emploi/",
             params={"reference": ref},
         ).mock(return_value=httpx.Response(200, text=_detail_html(ref, "T", "L")))
 

@@ -9,7 +9,7 @@ import pytest
 import respx
 
 from src.config import SourceConfig, SourceType
-from src.models import Country, JobSource
+from src.models import Country
 from src.scrapers.enisa import EnisaScraper
 from src.storage import JobRepository
 

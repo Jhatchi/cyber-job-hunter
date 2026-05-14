@@ -17,7 +17,6 @@ import respx
 from src.config import SourceConfig, SourceType
 from src.models import Country, JobSource
 from src.scrapers.recruitee import (
-    RecruiteeScraper,
     _parse_recruitee_date,
     build_itsme_scraper,
 )

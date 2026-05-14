@@ -103,7 +103,7 @@ def _trigger_scrape() -> None:
 
     try:
         with log_path.open("w", encoding="utf-8") as log_file:
-            subprocess.Popen(  # noqa: S603
+            subprocess.Popen(
                 [sys.executable, "scripts/run_scrape.py"],
                 cwd=str(project_root),
                 stdout=log_file,
@@ -113,7 +113,7 @@ def _trigger_scrape() -> None:
         st.session_state["scrape_triggered_at"] = datetime.now().isoformat()
         st.toast("🕷️ Scrape lancé en arrière-plan. Reviens dans ~15 min + clique Refresh.",
                  icon="🚀")
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         st.error(f"Impossible de lancer le scrape : {e}")
 
 

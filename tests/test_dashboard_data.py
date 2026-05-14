@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -19,8 +19,6 @@ from dashboard.data import (
     load_all_jobs_with_latest_score,
     sort_rows,
 )
-from src.models import ScrapeRun
-from src.config import load_profile
 from dashboard.format import (
     country_flag,
     humanize_age,
@@ -29,7 +27,8 @@ from dashboard.format import (
     source_emoji,
     truncate,
 )
-from src.models import Country, Job, JobBase, JobSource, ScoreResult
+from src.config import load_profile
+from src.models import Country, JobBase, JobSource, ScoreResult, ScrapeRun
 from src.storage import JobRepository
 
 
@@ -50,7 +49,7 @@ def _row(
     description: str = "",
     breakdown: list[dict] | None = None,
 ) -> JobRow:
-    base = datetime.now(timezone.utc) - timedelta(days=days_old)
+    base = datetime.now(UTC) - timedelta(days=days_old)
     return JobRow(
         id=1, source=source, company=company, title=title,
         location=location, country=country, url="https://x.test/j",
@@ -307,7 +306,7 @@ def test_score_badge_html_contains_score():
 
 
 def test_humanize_age():
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     assert "instant" in humanize_age(now - timedelta(seconds=10), now=now)
     assert "min" in humanize_age(now - timedelta(minutes=5), now=now)
     assert "h" in humanize_age(now - timedelta(hours=3), now=now)
@@ -317,7 +316,7 @@ def test_humanize_age():
 
 def test_humanize_age_naive_datetime_is_safe():
     naive = datetime(2026, 4, 1, 12, 0)  # pas de tzinfo
-    out = humanize_age(naive, now=datetime.now(timezone.utc))
+    out = humanize_age(naive, now=datetime.now(UTC))
     assert isinstance(out, str)
 
 
@@ -342,7 +341,7 @@ def test_country_flag_known_and_unknown():
 
 
 def test_is_new_since():
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     fresh = _row(days_old=0)
     old = _row(days_old=5)
     cutoff = now - timedelta(hours=1)
@@ -370,7 +369,7 @@ def test_get_new_offers_cutoff_no_runs(tmp_path):
         assert get_new_offers_cutoff(repo) is None
         # 1 run only → toujours None
         repo.save_run(
-            ScrapeRun(started_at=datetime.now(timezone.utc), sources_run=[])
+            ScrapeRun(started_at=datetime.now(UTC), sources_run=[])
         )
         assert get_new_offers_cutoff(repo) is None
     finally:
@@ -384,8 +383,8 @@ def test_get_new_offers_cutoff_uses_previous_run(tmp_path):
     repo = JobRepository(db_url=f"sqlite:///{tmp_path / 'b.db'}")
     repo.create_all()
     try:
-        t1 = datetime(2026, 4, 28, 10, 0, tzinfo=timezone.utc)
-        t2 = datetime(2026, 4, 29, 10, 0, tzinfo=timezone.utc)
+        t1 = datetime(2026, 4, 28, 10, 0, tzinfo=UTC)
+        t2 = datetime(2026, 4, 29, 10, 0, tzinfo=UTC)
         repo.save_run(ScrapeRun(started_at=t1, sources_run=[]))
         repo.save_run(ScrapeRun(started_at=t2, sources_run=[]))
         assert get_new_offers_cutoff(repo) == t1  # avant-dernier
@@ -394,7 +393,7 @@ def test_get_new_offers_cutoff_uses_previous_run(tmp_path):
 
 
 def test_filter_new_only():
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     cutoff = now - timedelta(hours=1)
     rows = [_row(days_old=0), _row(days_old=2)]  # 1 fresh, 1 old
     assert len(filter_new_only(rows, cutoff)) == 1

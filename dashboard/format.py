@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-
+from datetime import UTC, datetime
 
 # Couleurs WCAG AA (contraste >= 4.5:1) — identiques au mockup email.
 SCORE_GREEN = "#1f7a3a"
@@ -36,10 +35,10 @@ def score_badge_html(score: int) -> str:
 def humanize_age(dt: datetime, now: datetime | None = None) -> str:
     """Renvoie 'il y a Nh / Nj' pour un datetime relatif. Robuste TZ-aware/naive."""
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    now = now or datetime.now(timezone.utc)
+        dt = dt.replace(tzinfo=UTC)
+    now = now or datetime.now(UTC)
     if now.tzinfo is None:
-        now = now.replace(tzinfo=timezone.utc)
+        now = now.replace(tzinfo=UTC)
     delta = now - dt
     seconds = int(delta.total_seconds())
     if seconds < 60:

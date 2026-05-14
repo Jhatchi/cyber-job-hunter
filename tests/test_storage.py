@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -98,7 +98,7 @@ def test_upsert_first_time_returns_is_new_true(repo: JobRepository):
 
 def test_upsert_same_offer_returns_is_new_false(repo: JobRepository):
     repo.upsert_job(_make_jobbase())
-    job, is_new = repo.upsert_job(_make_jobbase())
+    _job, is_new = repo.upsert_job(_make_jobbase())
     assert is_new is False
 
 
@@ -188,7 +188,7 @@ def test_get_recent_jobs_no_score_filter_includes_all(repo: JobRepository):
 
 def test_get_new_jobs_since_filter(repo: JobRepository):
     repo.upsert_job(_make_jobbase(external_id="a"))
-    cutoff = datetime.now(timezone.utc) + timedelta(seconds=1)
+    cutoff = datetime.now(UTC) + timedelta(seconds=1)
     # Le job 'a' a first_seen_at < cutoff → doit être exclu
     new_jobs = repo.get_new_jobs_since(cutoff)
     assert len(new_jobs) == 0
@@ -242,44 +242,44 @@ def test_export_csv_filter_min_score(repo: JobRepository, tmp_path: Path):
 
 def test_save_run_and_count(repo: JobRepository):
     assert repo.count_runs() == 0
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     repo.save_run(
-        ScrapeRun(started_at=datetime.now(timezone.utc), sources_run=["nviso"])
+        ScrapeRun(started_at=datetime.now(UTC), sources_run=["nviso"])
     )
     assert repo.count_runs() == 1
 
 
 def test_get_latest_run_returns_most_recent(repo: JobRepository):
-    from datetime import datetime, timezone
+    from datetime import datetime
 
-    t1 = datetime(2026, 4, 28, 10, 0, tzinfo=timezone.utc)
-    t2 = datetime(2026, 4, 29, 10, 0, tzinfo=timezone.utc)
+    t1 = datetime(2026, 4, 28, 10, 0, tzinfo=UTC)
+    t2 = datetime(2026, 4, 29, 10, 0, tzinfo=UTC)
     repo.save_run(ScrapeRun(started_at=t1, sources_run=[]))
     repo.save_run(ScrapeRun(started_at=t2, sources_run=[]))
     latest = repo.get_latest_run()
     assert latest is not None
     # SQLite SQLModel renvoie des datetimes naive — comparaison sur date/heure brute
-    assert latest.started_at.replace(tzinfo=timezone.utc) == t2
+    assert latest.started_at.replace(tzinfo=UTC) == t2
 
 
 def test_get_previous_run_returns_second_latest(repo: JobRepository):
-    from datetime import datetime, timezone
+    from datetime import datetime
 
-    t1 = datetime(2026, 4, 28, 10, 0, tzinfo=timezone.utc)
-    t2 = datetime(2026, 4, 29, 10, 0, tzinfo=timezone.utc)
+    t1 = datetime(2026, 4, 28, 10, 0, tzinfo=UTC)
+    t2 = datetime(2026, 4, 29, 10, 0, tzinfo=UTC)
     repo.save_run(ScrapeRun(started_at=t1, sources_run=[]))
     repo.save_run(ScrapeRun(started_at=t2, sources_run=[]))
     previous = repo.get_previous_run()
     assert previous is not None
-    assert previous.started_at.replace(tzinfo=timezone.utc) == t1
+    assert previous.started_at.replace(tzinfo=UTC) == t1
 
 
 def test_get_previous_run_none_with_single_run(repo: JobRepository):
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     repo.save_run(
-        ScrapeRun(started_at=datetime.now(timezone.utc), sources_run=[])
+        ScrapeRun(started_at=datetime.now(UTC), sources_run=[])
     )
     assert repo.get_previous_run() is None
 

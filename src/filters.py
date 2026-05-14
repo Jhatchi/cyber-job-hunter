@@ -22,7 +22,6 @@ from functools import lru_cache
 from src.config import Profile
 from src.models import JobBase, RejectReason
 
-
 # ─── Résultat ────────────────────────────────────────────────────────────
 
 

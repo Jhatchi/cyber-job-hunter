@@ -25,7 +25,6 @@ from loguru import logger
 from src.models import Country, JobBase, JobSource
 from src.scrapers.base import BaseScraper, ScrapeError
 
-
 _DEFAULT_COMPANY = "EASI"
 _DETAIL_SELECTORS: tuple[str, ...] = (
     "main",

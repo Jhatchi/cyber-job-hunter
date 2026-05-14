@@ -32,7 +32,6 @@ from loguru import logger
 from src.models import Country, JobBase, JobSource
 from src.scrapers.base import BaseScraper, ScrapeError, clean_html_to_text
 
-
 _DEFAULT_COMPANY = "Capgemini"
 _PAGE_SIZE = 20
 _COUNTRY_CODE_BE = "be-en"
@@ -60,7 +59,7 @@ class CapgeminiScraper(BaseScraper):
             response = self._client.get(
                 self.config.base_url, params=params, headers=_API_HEADERS
             )
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             raise ScrapeError(f"Capgemini API request failed: {e}") from e
 
         if not (200 <= response.status_code < 300):

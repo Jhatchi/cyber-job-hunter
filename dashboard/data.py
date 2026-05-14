@@ -8,7 +8,7 @@ Toutes les fonctions ici sont pures ou n'ont qu'un side-effect lecture DB :
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -200,7 +200,7 @@ def filter_rows(
     """
     cutoff: datetime | None = None
     if discovered_within_days is not None and discovered_within_days > 0:
-        cutoff = datetime.now(timezone.utc) - timedelta(days=discovered_within_days)
+        cutoff = datetime.now(UTC) - timedelta(days=discovered_within_days)
 
     # Pré-calcule l'union des keywords pour chaque catégorie demandée
     category_keywords: set[str] = set()
@@ -226,7 +226,7 @@ def filter_rows(
         if needle and needle not in (r.title + " " + r.company).lower():
             continue
         if cutoff is not None:
-            seen_at = r.first_seen_at if r.first_seen_at.tzinfo else r.first_seen_at.replace(tzinfo=timezone.utc)
+            seen_at = r.first_seen_at if r.first_seen_at.tzinfo else r.first_seen_at.replace(tzinfo=UTC)
             if seen_at < cutoff:
                 continue
         if matched_keywords_any:
@@ -308,14 +308,14 @@ def compute_stats(rows: list[JobRow]) -> GlobalStats:
 def is_new_since(row: JobRow, since: datetime) -> bool:
     seen_at = row.first_seen_at
     if seen_at.tzinfo is None:
-        seen_at = seen_at.replace(tzinfo=timezone.utc)
+        seen_at = seen_at.replace(tzinfo=UTC)
     if since.tzinfo is None:
-        since = since.replace(tzinfo=timezone.utc)
+        since = since.replace(tzinfo=UTC)
     return seen_at >= since
 
 
 def now_utc() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def get_new_offers_cutoff(repo: JobRepository) -> datetime | None:
@@ -329,7 +329,7 @@ def get_new_offers_cutoff(repo: JobRepository) -> datetime | None:
         return None
     started = previous.started_at
     if started.tzinfo is None:
-        started = started.replace(tzinfo=timezone.utc)
+        started = started.replace(tzinfo=UTC)
     return started
 
 

@@ -21,7 +21,6 @@ from loguru import logger
 from src.models import Country, JobBase, JobSource
 from src.scrapers.base import BaseScraper, ScrapeError, clean_html_to_text
 
-
 # Catégories Remotive utiles pour notre filtre cyber.
 # Plus large = plus de bruit mais meilleure coverage. Les TOS limitent à 4 req/j ;
 # on en fait 1 par run avec la catégorie la plus pertinente.

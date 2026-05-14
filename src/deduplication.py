@@ -6,7 +6,7 @@ modification se fait via `content_hash` (SHA-256 de title|company|location|descr
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from src.models import Job, JobBase
 
@@ -36,7 +36,7 @@ def merge_incoming(existing: Job, incoming: JobBase) -> Job:
         - `last_seen_at` et `scraped_at` à maintenant
         - `is_active = True` (l'offre est de nouveau visible côté source)
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     existing.title = incoming.title
     existing.company = incoming.company
     existing.location = incoming.location

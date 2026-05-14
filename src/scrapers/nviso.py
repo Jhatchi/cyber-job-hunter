@@ -21,12 +21,11 @@ from collections.abc import Iterable
 from typing import ClassVar
 from urllib.parse import urljoin
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from loguru import logger
 
 from src.models import Country, JobBase, JobSource
 from src.scrapers.base import BaseScraper, ScrapeError
-
 
 _DEFAULT_COMPANY = "NVISO"
 _DETAIL_SELECTORS: tuple[str, ...] = (
@@ -55,13 +54,13 @@ def _slug_from_href(href: str) -> str:
     return href.rstrip("/").rsplit("/", 1)[-1]
 
 
-def _extract_location_text(link_element) -> str | None:  # type: ignore[no-untyped-def]
+def _extract_location_text(link_element: Tag) -> str | None:
     """Premier `<div>` direct dont le texte est court (≤ 30 chars) et ne ressemble pas à un bouton.
 
     Heuristique stable même si NVISO change ses classes Tailwind.
     """
     for div in link_element.find_all("div", recursive=False):
-        text = div.get_text(strip=True)
+        text: str = div.get_text(strip=True)
         if not text or len(text) > 30:
             continue
         lowered = text.lower()

@@ -28,7 +28,6 @@ from loguru import logger
 from src.models import Country, JobBase, JobSource
 from src.scrapers.base import BaseScraper, ScrapeError
 
-
 _DEFAULT_COMPANY = "Cream by Audensiel"
 _DEFAULT_LOCATION = "Luxembourg"  # HQ
 _PROJECT_HREF_RE = re.compile(r"https?://[^/]+/project/(?P<slug>[a-z0-9-]+)/?")

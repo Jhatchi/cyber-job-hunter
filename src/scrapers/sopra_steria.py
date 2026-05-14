@@ -29,7 +29,6 @@ from src.scrapers.base import (
     extract_jobposting_jsonld,
 )
 
-
 _DEFAULT_COMPANY = "Sopra Steria Belgium"
 _BASE_HOST = "https://careers.soprasteria.be"
 
@@ -104,7 +103,7 @@ class SopraSteriaScraper(BaseScraper):
         for job in jobs:
             try:
                 response = self._http_get(job.url)
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.debug(
                     "[{}] detail fetch failed for {}: {}", self.name, job.external_id, e
                 )

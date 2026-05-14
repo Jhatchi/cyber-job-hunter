@@ -31,7 +31,6 @@ from loguru import logger
 from src.models import Country, JobBase, JobSource
 from src.scrapers.base import BaseScraper, ScrapeError
 
-
 _DEFAULT_COMPANY = "ENISA"
 _BASE_HOST = "https://www.enisa.europa.eu"
 _DETAIL_SELECTORS: tuple[str, ...] = (
@@ -134,7 +133,7 @@ class EnisaScraper(BaseScraper):
             try:
                 response = self._http_get(job.url)
                 soup = BeautifulSoup(response.text, "lxml")
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.debug(
                     "[{}] detail fetch failed for {}: {}", self.name, job.external_id, e
                 )

@@ -9,8 +9,8 @@ from __future__ import annotations
 from collections.abc import Callable
 
 from src.config import SourceConfig
-from src.scrapers.base import BaseScraper
 from src.scrapers.actiris import ActirisScraper
+from src.scrapers.base import BaseScraper
 from src.scrapers.capgemini import CapgeminiScraper
 from src.scrapers.cream import CreamScraper
 from src.scrapers.devoteam import DevoteamScraper
@@ -19,8 +19,8 @@ from src.scrapers.enisa import EnisaScraper
 from src.scrapers.epam import EpamScraper
 from src.scrapers.kpmg import KpmgScraper
 from src.scrapers.nexova import NexovaScraper
-from src.scrapers.orange_cyberdefense import OrangeCyberdefenseScraper
 from src.scrapers.nviso import NvisoScraper
+from src.scrapers.orange_cyberdefense import OrangeCyberdefenseScraper
 from src.scrapers.recruitee import build_itsme_scraper
 from src.scrapers.remotive import RemotiveScraper
 from src.scrapers.smals import SmalsScraper
@@ -39,7 +39,7 @@ SCRAPER_FACTORIES: dict[str, ScraperFactory] = {
     "smals": SmalsScraper,        # Sprint 2 — ICT sécurité sociale BE
     "cream": CreamScraper,        # Sprint 2 — ESN cyber LU (ex-Cream Consulting)
     "travaillerpour": TravaillerPourScraper,  # Sprint 2 — emplois fédéraux BE (remplace CCB)
-    "actiris": ActirisScraper,                 # Sprint 2 — service public emploi Bruxelles (sitemap + détail)
+    "actiris": ActirisScraper,                 # Sprint 2 - emploi Bruxelles (sitemap)
     "accenture": build_accenture_scraper,      # Sprint 2 — Workday CXS API (Big4 conseil cyber)
     "kpmg": KpmgScraper,                        # Sprint 2+ — RSS feed TalentSoft Belgium
     "capgemini": CapgeminiScraper,              # Sprint 2+ — API custom Azure (BE filtered)
@@ -48,8 +48,8 @@ SCRAPER_FACTORIES: dict[str, ScraperFactory] = {
     "sopra_steria": SopraSteriaScraper,         # Sprint 3 — Attrax HTML + JSON-LD JobPosting
     "nexova": NexovaScraper,                    # Sprint 3 — pure-player cyber/défense BE (ESA Redu)
     "epam": EpamScraper,                        # Sprint 3 — Next.js _next/data API (BE filtered)
-    "toreon": ToreonScraper,                    # Sprint 3 — pure-player cyber consulting BE (Antwerp)
-    "enisa": EnisaScraper,                      # Sprint 3 — agence cyber UE (Athens HQ + Brussels office)
+    "toreon": ToreonScraper,                    # Sprint 3 - pure-player cyber BE (Antwerp)
+    "enisa": EnisaScraper,                      # Sprint 3 - EU cyber agency (Athens + Brussels)
 }
 
 

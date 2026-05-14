@@ -25,7 +25,6 @@ from src.config import SourceConfig
 from src.models import Country, JobBase, JobSource
 from src.scrapers.base import BaseScraper, ScrapeError, clean_html_to_text
 
-
 _PAGE_SIZE = 20
 
 # Mapping pays observés dans les externalPath Accenture (`/job/<City>/<slug>_<id>`).
@@ -87,7 +86,7 @@ class WorkdayScraper(BaseScraper):
     ) -> None:
         super().__init__(config, **kwargs)
         self.source = source  # type: ignore[misc]
-        self.name = source.value
+        self.name = source.value  # type: ignore[misc]
         self._workday_host = host  # ex: "accenture.wd103.myworkdayjobs.com"
         self._workday_tenant = tenant  # ex: "accenture"
         self._workday_site = site  # ex: "AccentureCareers"
@@ -167,7 +166,7 @@ class WorkdayScraper(BaseScraper):
             detail_url = api_base + ext_path
             try:
                 response = self._http_get(detail_url)
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 logger.debug(
                     "[{}] detail API failed for {}: {}", self.name, job.external_id, e
                 )
@@ -184,7 +183,8 @@ class WorkdayScraper(BaseScraper):
                 continue
             try:
                 text = clean_html_to_text(html_desc)
-            except Exception:  # noqa: BLE001
+            except Exception as exc:
+                logger.debug("workday: failed to clean HTML description, skipping: {}", exc)
                 continue
             if len(text) >= 200:
                 job.description = text[:8000]

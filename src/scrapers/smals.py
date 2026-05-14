@@ -29,7 +29,6 @@ from loguru import logger
 from src.models import Country, JobBase, JobSource
 from src.scrapers.base import BaseScraper, ScrapeError
 
-
 _DEFAULT_COMPANY = "Smals"
 _DEFAULT_LOCATION = "Brussels"  # Siège Smals, pas exposé sur listing
 _HREF_RE = re.compile(r"^/(?:[a-z]{2}/)?jobs/apply/(?P<id>\d+)/(?P<slug>[a-z0-9-]+)/?$")

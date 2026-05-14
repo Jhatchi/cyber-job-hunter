@@ -27,7 +27,6 @@ from loguru import logger
 from src.models import Country, JobBase, JobSource
 from src.scrapers.base import BaseScraper, ScrapeError, clean_html_to_text
 
-
 _DEFAULT_COMPANY = "EPAM"
 _HOMEPAGE_URL = "https://careers.epam.com/en/jobs/belgium"
 _DATA_URL_TEMPLATE = (

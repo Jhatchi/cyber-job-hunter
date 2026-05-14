@@ -13,13 +13,14 @@ upsert/mark_inactive, stats du run) est mutualisé via `run()`.
 
 from __future__ import annotations
 
+import json as _json
 import random
 import re
 import time
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from datetime import datetime, timezone
-from typing import ClassVar
+from datetime import UTC, datetime
+from typing import Any, ClassVar
 from urllib.parse import urlparse
 from urllib.robotparser import RobotFileParser
 
@@ -31,7 +32,6 @@ from src.config import SourceConfig
 from src.models import JobBase, JobSource
 from src.storage import JobRepository
 
-
 # ─── HTML → texte structuré ──────────────────────────────────────────────
 
 _BLOCK_TAGS = (
@@ -41,7 +41,7 @@ _BLOCK_TAGS = (
 )
 
 
-def extract_jobposting_jsonld(html: str) -> dict | None:
+def extract_jobposting_jsonld(html: str) -> dict[str, Any] | None:
     """Récupère le premier bloc JSON-LD `@type=JobPosting` d'une page HTML.
 
     Schema.org `JobPosting` est un format standardisé que beaucoup d'ATS
@@ -60,7 +60,6 @@ def extract_jobposting_jsonld(html: str) -> dict | None:
     """
     if not html:
         return None
-    import json as _json
     from bs4 import BeautifulSoup  # noqa: PLC0415
 
     soup = BeautifulSoup(html, "lxml")
@@ -291,12 +290,12 @@ class BaseScraper(ABC):
     def run(self) -> ScrapeRunResult:
         """Cycle complet d'un scraping : politesse → fetch → upsert → mark_inactive."""
         result = ScrapeRunResult(
-            source=self.source, started_at=datetime.now(timezone.utc)
+            source=self.source, started_at=datetime.now(UTC)
         )
 
         if self.config.respect_robots_txt and not self._robots_allowed(self.config.base_url):
             result.aborted_reason = "robots_disallow"
-            result.finished_at = datetime.now(timezone.utc)
+            result.finished_at = datetime.now(UTC)
             logger.warning("[{}] robots.txt disallows {}", self.name, self.config.base_url)
             return result
 
@@ -342,7 +341,7 @@ class BaseScraper(ABC):
                     self.source, external_ids
                 )
 
-        result.finished_at = datetime.now(timezone.utc)
+        result.finished_at = datetime.now(UTC)
         logger.success(
             "[{}] done: fetched={}, new={}, updated={}, inactive={}, errors={}",
             self.name, result.jobs_fetched, result.jobs_inserted,
@@ -409,7 +408,7 @@ class BaseScraper(ABC):
 
     def _wait_rate_limit(self) -> None:
         """Sleep jusqu'à respecter `rate_limit_seconds + random jitter`."""
-        wait = self.config.rate_limit_seconds + random.uniform(
+        wait = self.config.rate_limit_seconds + random.uniform(  # noqa: S311 - jitter, not crypto
             0, self.config.jitter_max_seconds
         )
         elapsed = time.monotonic() - self._last_request_monotonic
@@ -447,7 +446,7 @@ class BaseScraper(ABC):
                 rp = RobotFileParser()
                 rp.parse(response.text.splitlines())
                 allowed = rp.can_fetch(self.config.user_agent, url)
-        except (httpx.RequestError, Exception) as e:  # noqa: BLE001
+        except (httpx.RequestError, Exception) as e:
             logger.debug("[{}] robots.txt unreachable: {}", self.name, e)
             allowed = True  # En cas d'erreur, on ne bloque pas (mais on log)
 
@@ -478,7 +477,7 @@ class BaseScraper(ABC):
             try:
                 response = self._http_get(job.url)
                 soup = BeautifulSoup(response.text, "lxml")
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 # Volontairement large : un échec d'enrichissement ne doit JAMAIS
                 # bloquer le run (placeholder description suffit comme fallback).
                 logger.debug("[{}] detail fetch failed for {}: {}", self.name, job.url, e)

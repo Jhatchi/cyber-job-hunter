@@ -11,7 +11,6 @@ import respx
 from src.config import SourceConfig, SourceType
 from src.models import Country, JobSource
 from src.scrapers.workday import (
-    WorkdayScraper,
     _city_to_country,
     build_accenture_scraper,
 )

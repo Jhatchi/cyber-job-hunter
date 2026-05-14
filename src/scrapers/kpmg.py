@@ -30,7 +30,6 @@ from loguru import logger
 from src.models import Country, JobBase, JobSource
 from src.scrapers.base import BaseScraper, ScrapeError, clean_html_to_text
 
-
 _DEFAULT_COMPANY = "KPMG Belgium"
 
 # Pattern : "2026-1394 - Cloud Security Specialist" → on garde la partie après " - "

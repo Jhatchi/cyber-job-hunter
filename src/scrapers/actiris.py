@@ -32,7 +32,6 @@ from loguru import logger
 from src.models import Country, JobBase, JobSource
 from src.scrapers.base import BaseScraper, ScrapeError, clean_html_to_text
 
-
 SITEMAP_URL = "https://www.actiris.brussels/sitemapoffers-fr.xml"
 _DEFAULT_COMPANY = "Actiris (offre publique)"
 _PAGE_SIZE = 20

@@ -18,7 +18,6 @@ from src.scrapers.remotive import (
 )
 from src.storage import JobRepository
 
-
 # ─── Fixtures ────────────────────────────────────────────────────────────
 
 

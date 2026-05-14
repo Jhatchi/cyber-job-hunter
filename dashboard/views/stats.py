@@ -24,7 +24,7 @@ def _score_distribution(rows: list[JobRow]) -> pd.DataFrame:
 def _by_source(rows: list[JobRow]) -> pd.DataFrame:
     counts = Counter(r.source for r in rows)
     return pd.DataFrame(
-        {"Source": [f"{source_emoji(s)} {s}" for s in counts.keys()],
+        {"Source": [f"{source_emoji(s)} {s}" for s in counts],
          "Offres": list(counts.values())},
     ).set_index("Source").sort_values("Offres", ascending=False)
 
@@ -32,7 +32,7 @@ def _by_source(rows: list[JobRow]) -> pd.DataFrame:
 def _by_country(rows: list[JobRow]) -> pd.DataFrame:
     counts = Counter(r.country for r in rows)
     return pd.DataFrame(
-        {"Pays": [f"{country_flag(c)} {c}" for c in counts.keys()],
+        {"Pays": [f"{country_flag(c)} {c}" for c in counts],
          "Offres": list(counts.values())},
     ).set_index("Pays").sort_values("Offres", ascending=False)
 

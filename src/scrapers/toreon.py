@@ -28,7 +28,6 @@ from loguru import logger
 from src.models import Country, JobBase, JobSource
 from src.scrapers.base import BaseScraper, ScrapeError
 
-
 _DEFAULT_COMPANY = "Toreon"
 _DEFAULT_LOCATION = "Belgium"  # Antwerp HQ, toutes offres BE
 _BASE_HOST = "https://www.toreon.com"
