@@ -1,25 +1,68 @@
 # Cyber Job Hunter
 
-Automated cybersecurity job aggregator with profile-based scoring and live dashboard. Built as a portfolio project alongside the BeCode Brussels Blue & Red Team training, ahead of a September 2026 internship search.
+Automated cybersecurity job aggregator with profile-based scoring and a live Streamlit dashboard. Built solo during the BeCode Brussels Blue & Red Team bootcamp, targeting a September 2026 internship.
 
 [![CI](https://github.com/Jhatchi/cyber-job-hunter/actions/workflows/ci.yml/badge.svg)](https://github.com/Jhatchi/cyber-job-hunter/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-357%20passing-brightgreen.svg)](#project-metrics)
+[![Coverage](https://img.shields.io/badge/coverage-89%25-brightgreen.svg)](#project-metrics)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
-[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-black.svg)](pyproject.toml)
-[![Type-checked: mypy strict](https://img.shields.io/badge/type--checked-mypy%20strict-blue.svg)](pyproject.toml)
+[![Type-checked](https://img.shields.io/badge/mypy-strict-blue.svg)](pyproject.toml)
+[![Lint](https://img.shields.io/badge/ruff-bandit_S-black.svg)](pyproject.toml)
+[![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Johan--Emmanuel%20Hatchi-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/johan-emmanuel-hatchi/)
+
+## Screenshots
+
+![Listing view](docs/screenshots/01-listing.png)
+
+<details>
+<summary>Detail and Stats views</summary>
+
+![Detail view](docs/screenshots/02-detail.png)
+![Stats view](docs/screenshots/03-stats.png)
+
+</details>
 
 ## What it does
 
-Scrapes 18 cybersecurity job sources (Belgium, Luxembourg, EU, remote), filters them through a tunable profile, scores each posting on a 0-100 scale with full breakdown, and exposes the results in a Streamlit dashboard plus CSV export. Scraping respects `robots.txt`, rate limits each domain, backs off on errors, and trips a circuit breaker after repeated failures.
+- **Scrapes 18 cybersecurity job sources** across Belgium, Luxembourg and the EU (Big4, pure-play cyber, public sector, ENISA, remote aggregators).
+- **Scores each posting 0 to 100** through a tunable profile (target titles, seniority, languages, location) with a line-by-line breakdown of why the score is what it is.
+- **Surfaces results in a Streamlit dashboard** plus CSV export, with "new since last run" detection and 10+ filters.
+
+## Tech stack
+
+**Core:** Python 3.11+, httpx, BeautifulSoup4, lxml, feedparser, pydantic v2, SQLModel (SQLite), loguru, click
+**HTTP caching:** hishel (ETag, Last-Modified)
+**Dashboard:** Streamlit, pandas
+**Quality:** pytest + respx, ruff (with bandit `S` selector), mypy strict, GitHub Actions CI
 
 ## Quick start
 
 ```bash
-git clone https://github.com/Jhatchi/cyber-job-hunter.git
-cd cyber-job-hunter
+git clone https://github.com/Jhatchi/cyber-job-hunter.git && cd cyber-job-hunter
 python3.11 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
-python scripts/init_db.py && python scripts/run_scrape.py
-streamlit run dashboard/app.py   # http://localhost:8501
+python scripts/init_db.py && python scripts/run_scrape.py && streamlit run dashboard/app.py
+```
+
+Dashboard at `http://localhost:8501`.
+
+## Project metrics
+
+| Metric | Value |
+|---|---|
+| Python LOC (`src` + `tests` + `dashboard` + `scripts`) | 12 257 |
+| Tests | 357 passing |
+| Coverage on `src/` | 89% (Streamlit UI excluded) |
+| Active scrapers | 18 across 6 categories |
+| Type safety | mypy `strict = true` |
+| Security lint | ruff with `S` (bandit) selector |
+| CI | GitHub Actions: ruff + mypy + pytest on every push |
+
+Run locally:
+
+```bash
+pytest --cov=src --cov-report=term
+ruff check . && mypy src
 ```
 
 ## Architecture
@@ -49,93 +92,69 @@ config/ (profile.yaml + sources.yaml)
               v
        storage.py  (SQLite via SQLModel, SHA-256 dedup)
               |
-       +------+-------+--------+
-       v              v        v
-   CSV export   Streamlit   Email digest
-                dashboard   (planned)
+       +------+-------+
+       v              v
+   CSV export   Streamlit dashboard
 ```
 
-## Features
+Centralized anti-abuse logic in `BaseScraper`: every scraper (REST, RSS, Workday, HTML) inherits rate limiting, backoff, circuit breaker and `robots.txt` parsing without duplication. New sources only implement their domain-specific parsing.
 
-### Working
+## Scoring engine
 
-**18 active scrapers across 6 categories:**
+Each posting scores 0 to 100 against a tunable profile (`config/profile.yaml`). Scores are **explainable**: the dashboard Detail tab shows every rule that fired, with matched keywords and rejection reasons.
 
-- *Big4 and ESN:* KPMG, Capgemini, Sopra Steria, Accenture, Devoteam, EPAM
-- *Pure-play cyber:* NVISO, Toreon, Orange Cyberdefense, EASI, Nexova, Cream
-- *Belgian public sector:* Smals, Actiris, Travaillerpour
-- *EU institutions:* ENISA
-- *Aggregators:* Remotive
-- *Other Belgian tech:* itsme
+**Headline signals:**
 
-**Engineering:**
+- `+30` target title match (SOC Analyst, IAM, Pentester, GRC Junior, ...)
+- `+15` junior / intern / trainee / 0-2 years
+- `+10` Brussels location, or "graduate program"
+- `+5` per tech keyword across 7 cyber categories (cap `+30`)
 
-- Centralized anti-abuse logic in `BaseScraper`: `robots.txt` parsing, configurable rate limit with random jitter, exponential backoff (5s, 15s, 45s), per-domain circuit breaker (3 failures, 1h cooldown), Cloudflare and captcha detection.
-- Explainable scoring engine: 60+ target titles, 7 cyber keyword categories, location and language signals, rejection rules with line-by-line breakdown.
-- Cyber relevance gate: postings with no target title and no tech keyword are rejected, preventing generalist ads from leaking into the top results.
-- SHA-256 content deduplication and soft delete in `storage.py`.
-- Streamlit dashboard with 3 tabs (Listing, Detail, Stats), 10+ filters, "new since last run" detection.
-- CSV export filterable by score.
-- Static User-Agent identified by a dedicated Proton Pass alias for revocability.
+**Penalties and rejections:**
 
-### Partial
+- `-20` "Master mandatory" with no alternative
+- Auto-reject: `5+ years`, Senior / Lead / Manager, NL B2+ required without EN or FR fallback, no target title AND no tech keyword (cyber relevance gate)
 
-- 🚧 HTTP caching via `hishel` (ETag, Last-Modified): wired in `BaseScraper`, not yet tuned per source.
+<details>
+<summary>Full rule set</summary>
 
-### Planned
+```
++30  target title match (SOC Analyst, IAM, Pentester, GRC Junior, etc.)
++15  "junior, intern, trainee, 0-2 years"
++10  "young graduate" in title OR "graduate program" in description
++5   per matched tech keyword (cap +30), 7 cyber categories
++10  Brussels                     +5   Wallonia, Luxembourg, BE-LU fallback
++10  FR + EN     +8 EN-only       +8 FR-only      +5 NL "nice to have"
+-5   "Bachelor required" with no alternative
+-20  "Master mandatory" with no alternative
+-10  "3+ years"
 
-- ❌ Email digest (Gmail SMTP plus cron via launchd), Sprint 3.
-- ❌ Cover letter generation via Anthropic API, Sprint 4.
-- ❌ User-Agent rotation and proxy support.
-- ❌ LinkedIn ingestion with ToS-aware safeguards, Sprint 4.
-- ❌ ML-based scoring trained on thumbs up/down feedback.
+Rejected (score = 0):
+- "5+ years", Senior, Lead, Manager, Principal, Team Lead
+- NL B2/C1/C2 required with no EN or FR alternative
+- Flanders location with no "English only" mention
+- Cyber relevance gate: no target title AND no tech keyword
+```
 
-## Screenshots
+</details>
 
-| Listing | Detail | Stats |
-|---|---|---|
-| ![Listing](docs/screenshots/01-listing.png) | ![Detail](docs/screenshots/02-detail.png) | ![Stats](docs/screenshots/03-stats.png) |
+## Sources
 
-Listing: top 5 cards + filterable table. Detail: per-job scoring breakdown, matched keywords, rejection reasons. Stats: distributions by source, country, and keyword.
+18 active scrapers across 6 categories:
 
-## Tech stack
-
-| Layer | Library | Version |
-|---|---|---|
-| Language | Python | 3.11+ |
-| HTTP client | httpx | >=0.27, <1.0 |
-| HTTP caching | hishel | >=0.0.30 |
-| HTML parsing | BeautifulSoup4 | >=4.12 |
-| XML parsing | lxml | >=5.0 |
-| RSS parsing | feedparser | >=6.0 |
-| Validation | pydantic | >=2.6, <3.0 |
-| ORM | sqlmodel | >=0.0.16 |
-| Logging | loguru | >=0.7 |
-| CLI | click | >=8.1 |
-| Dashboard | streamlit + pandas | >=1.33, >=2.2 |
-| Tests | pytest, pytest-cov, respx | >=8.1, >=5.0, >=0.21 |
-| Lint and security | ruff (with bandit `S` selector) | >=0.4 |
-| Type checking | mypy (strict mode) | >=1.10 |
-
-## Project metrics
-
-| Metric | Value |
+| Category | Sources |
 |---|---|
-| Python LOC (src + tests + dashboard + scripts) | 12 257 |
-| Tests | 357 passing |
-| Coverage | 89% on `src/` (excluding Streamlit UI dashboard) |
-| Active scrapers | 18 |
-| Type safety | mypy `strict = true` |
-| Lint and security | ruff with `S` (bandit) selector |
+| **Big4 and ESN** | KPMG, Capgemini, Sopra Steria, Accenture, Devoteam, EPAM |
+| **Pure-play cyber** | NVISO, Toreon, Orange Cyberdefense, EASI, Nexova, Cream |
+| **Belgian public sector** | Smals, Actiris, Travaillerpour |
+| **EU institutions** | ENISA |
+| **Aggregators** | Remotive |
+| **Other Belgian tech** | itsme |
 
-Run locally:
+Scraping techniques span REST JSON, RSS, Workday CXS, Next.js `_next/data`, XML sitemaps and plain HTML. Each source has its own config block in [`config/sources.yaml`](config/sources.yaml).
 
-```bash
-pytest --cov=src --cov-report=term
-ruff check . && mypy src
-```
-
-## Active sources
+<details>
+<summary>Full source table with technique and country</summary>
 
 | Source | Type | Country | Notes |
 |---|---|---|---|
@@ -158,56 +177,41 @@ ruff check . && mypy src
 | [Toreon](https://www.toreon.com/jobs/) | HTML | BE | Pure-play cyber consulting, Antwerp HQ. |
 | [ENISA](https://www.enisa.europa.eu/careers) | HTML | EU | EU cybersecurity agency, Athens HQ. |
 
-Deferred sources (with documented reasons in `config/sources.yaml`): CCB and EGov Select (anti-bot Akamai), cybersecurity.lu (React SPA, no public JSON), Spotit, Moovijob.lu (Cloudflare), CERT-EU (EU SECRET clearance required), LinkedIn (Sprint 4, ToS-aware safeguards).
+</details>
 
-## Scoring rules
+**Deferred sources** (documented in `config/sources.yaml`): CCB and EGov Select (Akamai anti-bot), cybersecurity.lu (React SPA, no public JSON), Spotit, Moovijob.lu (Cloudflare), CERT-EU (EU SECRET clearance required), LinkedIn (planned with ToS-aware safeguards).
 
-```
-+30  target title match (SOC Analyst, IAM, Pentester, GRC Junior, etc.)
-+15  "junior, intern, trainee, 0-2 years"
-+10  "young graduate" in title OR "graduate program" in description
-+5   per matched tech keyword (cap +30), 7 cyber categories
-+10  Brussels                     +5   Wallonia, Luxembourg, BE-LU fallback
-+10  FR + EN     +8 EN-only       +8 FR-only      +5 NL "nice to have"
--5   "Bachelor required" with no alternative
--20  "Master mandatory" with no alternative
--10  "3+ years"
+## Anti-abuse and ethics
 
-Rejected (score = 0):
-- "5+ years", Senior, Lead, Manager, Principal, Team Lead
-- NL B2/C1/C2 required with no EN or FR alternative
-- Flanders location with no "English only" mention
-- Cyber relevance gate: no target title AND no tech keyword
-```
+Job postings are public data, but scraping them responsibly is non-trivial. Centralized in `BaseScraper`:
 
-The breakdown is exposed line by line in the dashboard Detail tab, including matched keywords and rejection reasons.
+- **`robots.txt` respected** via `urllib.robotparser` before every fetch.
+- **Honest `User-Agent`** identifying the project, with a dedicated Proton Pass contact alias (revocable).
+- **Rate limit** 2 to 5 seconds plus random jitter per domain.
+- **Exponential backoff** on transient errors: 5s, 15s, 45s (3 retries max), then circuit breaker.
+- **Per-domain circuit breaker**: 3 consecutive 4xx or 5xx failures disable the source for 1 hour.
+- **Cloudflare and captcha detection** via word-boundary regex, with clean abort (no retry storms).
+- **No retry on terminal 4xx** (404, 403 when not bot-related).
+- **Pagination cap** configurable per source (default 5).
+- **LinkedIn and Indeed disabled by default**.
 
-## Profile
+The aggregator collects no personal data on applicants or recruiters. SQLite database stays local. No third-party analytics, no telemetry.
 
-Targeted roles: SOC Analyst Junior, Cybersecurity Intern, Blue Team Trainee, Detection Engineer Junior, GRC Junior, Threat Intel Junior, IR Junior, Young Graduate Cyber, IAM, Cloud Security, Pentester. Location priority: Brussels > Wallonia, Luxembourg. Languages: FR + EN, or EN-only, or FR-only. Full profile in [`config/profile.yaml`](config/profile.yaml).
+## Known limits
 
-## Anti-abuse practices
-
-- Honest `User-Agent` with a dedicated contact alias (Proton Pass).
-- `robots.txt` respected via `urllib.robotparser`.
-- Rate limit 2 to 5 seconds plus random jitter per domain.
-- Exponential backoff on transient errors: 5s, 15s, 45s (3 retries max).
-- Per-domain circuit breaker: 3 consecutive 4xx or 5xx failures disable the source for 1 hour.
-- Cloudflare and captcha detection via word-boundary regex, then clean abort.
-- No retry on terminal 4xx (404, 403 when not bot-related).
-- Pagination cap configurable per source (default 5).
-- LinkedIn and Indeed disabled by default.
-
-## Data and privacy
-
-Job postings are public data. The aggregator does not collect personal data on applicants or recruiters. SQLite database stays local. No third-party analytics. User-Agent identifies the project with a dedicated contact email for revocability.
+- **No JavaScript rendering.** Cloudflare-protected or fully client-rendered sources (Moovijob.lu, cybersecurity.lu, Spotit, EGov Select) are deferred. Adding Playwright would unblock them but at the cost of CI complexity and runtime: deliberate trade-off, not an oversight.
+- **Streamlit UI excluded from coverage.** The 89% applies to `src/`. Dashboard widgets are exercised manually. Adding `streamlit-testing` is on the backlog but low priority versus shipping new scrapers.
+- **Scoring is rule-based, not learned.** Weights are tuned by hand against the user's profile. A thumbs up/down feedback loop and ML scoring are planned (Sprint 4).
+- **Single profile, local SQLite.** No multi-user, no remote DB. Designed as a personal tool, not a SaaS. Migration to Postgres + multi-profile would be additive but is out of scope.
+- **Geographic scope: Belgium, Luxembourg, EU institutions, remote.** France/Netherlands/Germany not covered. Easy to add (new YAML entries), just not the current focus.
+- **No alerting yet.** New postings are surfaced in the dashboard but no email or push. Gmail SMTP digest with launchd cron is the next milestone (Sprint 3).
 
 ## Roadmap
 
-- ✅ Sprint 1 (April 2026): bootstrap, models, scoring, filters, SQLite storage, 4 scrapers.
-- ✅ Sprint 2 (April 2026): Streamlit dashboard, "new postings" detection, +14 scrapers (Smals, Cream, Travaillerpour, Actiris, Accenture, KPMG, Capgemini, Orange Cyberdefense, Devoteam, Sopra Steria, Nexova, EPAM, Toreon, ENISA), cyber relevance gate.
-- 🚧 Sprint 3: Gmail SMTP digest with launchd cron, Forem, StepStone, Jobat (TOS permitting), Workday Proximus.
-- 🚧 Sprint 4: Anthropic-powered cover letter drafts, LinkedIn ingestion with safeguards, ML scoring from thumbs up/down feedback.
+- ✅ **Sprint 1** (April 2026): bootstrap, Pydantic models, scoring engine, filters, SQLite storage, 4 scrapers.
+- ✅ **Sprint 2** (April 2026): Streamlit dashboard, "new since last run" detection, 14 additional scrapers (Smals, Cream, Travaillerpour, Actiris, Accenture, KPMG, Capgemini, Orange Cyberdefense, Devoteam, Sopra Steria, Nexova, EPAM, Toreon, ENISA), cyber relevance gate.
+- 🚧 **Sprint 3**: Gmail SMTP digest via launchd cron, Forem, StepStone, Jobat (TOS permitting), Workday Proximus.
+- 🚧 **Sprint 4**: Anthropic-powered cover letter drafts, LinkedIn ingestion with safeguards, ML scoring trained on thumbs up/down feedback.
 
 ## Project layout
 
@@ -221,7 +225,7 @@ cyber-job-hunter/
     models.py            Job, ScoreResult, ScrapeRun
     config.py            Pydantic loaders
     filters.py           rejection rules, cyber relevance gate
-    scoring.py           0-100 with breakdown
+    scoring.py           0-100 with explainable breakdown
     deduplication.py     SHA-256 content hash
     storage.py           JobRepository (SQLite)
     scrapers/            base.py + 18 concrete scrapers
@@ -232,8 +236,12 @@ cyber-job-hunter/
 
 ## Contributing
 
-Personal portfolio project, but issues, PRs, and suggestions are welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for code conventions.
+Personal portfolio project, but issues and PRs are welcome. Code conventions in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## License
 
 [MIT](LICENSE), 2026 Jhatchi.
+
+## About
+
+Built solo by **Johan-Emmanuel Hatchi** ([GitHub](https://github.com/Jhatchi) · [LinkedIn](https://www.linkedin.com/in/johan-emmanuel-hatchi/)) during the [BeCode Brussels](https://becode.org) Blue & Red Team bootcamp (November 2025 to September 2026). Open to cybersecurity internship opportunities starting September 2026 in Belgium.
