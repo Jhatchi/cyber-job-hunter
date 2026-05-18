@@ -2,7 +2,7 @@
 
 Automated cybersecurity job aggregator with profile-based scoring and a live Streamlit dashboard. Built solo during the BeCode Brussels Blue & Red Team bootcamp, targeting a September 2026 internship.
 
-[![CI](https://github.com/Jhatchi/cyber-job-hunter/actions/workflows/ci.yml/badge.svg)](https://github.com/Jhatchi/cyber-job-hunter/actions/workflows/ci.yml)
+[![CI](https://github.com/Jhatchi/Cyber-Job-Hunter/actions/workflows/ci.yml/badge.svg)](https://github.com/Jhatchi/Cyber-Job-Hunter/actions/workflows/ci.yml)
 [![Tests](https://img.shields.io/badge/tests-357%20passing-brightgreen.svg)](#project-metrics)
 [![Coverage](https://img.shields.io/badge/coverage-89%25-brightgreen.svg)](#project-metrics)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
@@ -39,7 +39,7 @@ Automated cybersecurity job aggregator with profile-based scoring and a live Str
 ## Quick start
 
 ```bash
-git clone https://github.com/Jhatchi/cyber-job-hunter.git && cd cyber-job-hunter
+git clone https://github.com/Jhatchi/Cyber-Job-Hunter.git && cd Cyber-Job-Hunter
 python3.11 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
 python scripts/init_db.py && python scripts/run_scrape.py && streamlit run dashboard/app.py
 ```
@@ -216,7 +216,7 @@ The aggregator collects no personal data on applicants or recruiters. SQLite dat
 ## Project layout
 
 ```
-cyber-job-hunter/
+Cyber-Job-Hunter/
   pyproject.toml         ruff, mypy strict, pytest config
   requirements.txt
   .env.example

@@ -1,5 +1,5 @@
 [project]
-name = "cyber-job-hunter"
+name = "Cyber-Job-Hunter"
 version = "0.1.0"
 description = "Automated cyber security job scraper with profile-based scoring — personal portfolio project"
 readme = "README.md"
@@ -19,8 +19,8 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Jhatchi/cyber-job-hunter"
-Issues  = "https://github.com/Jhatchi/cyber-job-hunter/issues"
+Homepage = "https://github.com/Jhatchi/Cyber-Job-Hunter"
+Issues  = "https://github.com/Jhatchi/Cyber-Job-Hunter/issues"
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]

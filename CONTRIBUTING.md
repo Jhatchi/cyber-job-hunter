@@ -5,8 +5,8 @@ Personal project but issues, PRs and suggestions are welcome. A few conventions 
 ## Local setup
 
 ```bash
-git clone https://github.com/Jhatchi/cyber-job-hunter.git
-cd cyber-job-hunter
+git clone https://github.com/Jhatchi/Cyber-Job-Hunter.git
+cd Cyber-Job-Hunter
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 pytest  # verifies everything passes (357 tests)
