@@ -44,6 +44,7 @@ class JobSource(StrEnum):
     EPAM = "epam"
     TOREON = "toreon"
     ENISA = "enisa"
+    THALES = "thales"
     # Étendu en Sprint 3+
     OTHER = "other"
 

@@ -187,6 +187,16 @@ sources:
     rate_limit_seconds: 3
     notes: "Agence européenne cybersécurité. HQ Athens, bureau Brussels. Pages /recruitment/vacancies/{slug}. Reclassement BE si description mentionne Brussels/Belgium."
 
+  thales:
+    enabled: true
+    type: html
+    base_url: "https://careers.thalesgroup.com/global/en/search-results"
+    company_name_override: "Thales"
+    country_default: BE
+    max_pages: 330   # ~322 pages réelles (3215/10) ; arrêt naturel via has_next
+    rate_limit_seconds: 3
+    notes: "Phenom SSR. phApp.ddo.eagerLoadRefineSearch.data.jobs, 10/page, filtre BE client-side. Workday backend désactivé au public. Enrichissement description via JSON-LD détail."
+
 # ─── Sprint 2+ — planifiés (désactivés) ────────────────────────────────
 planned_sources:
 
