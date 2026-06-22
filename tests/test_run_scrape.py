@@ -32,7 +32,7 @@ def test_registry_contains_all_active_sources():
     expected = {"remotive", "nviso", "itsme", "easi", "smals", "cream",
                 "travaillerpour", "actiris", "accenture", "kpmg",
                 "capgemini", "orange_cyberdefense", "devoteam", "sopra_steria",
-                "nexova", "epam", "toreon", "enisa"}
+                "nexova", "epam", "toreon", "enisa", "thales"}
     assert set(SCRAPER_FACTORIES.keys()) == expected
 
 
@@ -151,6 +151,10 @@ def test_run_scrape_full_e2e(tmp_path: Path):
     respx.get("https://www.enisa.europa.eu/careers").mock(
         return_value=httpx.Response(200, text="<html></html>")
     )
+    respx.get(
+        "https://careers.thalesgroup.com/global/en/search-results",
+        params={"from": "0", "s": "1"},
+    ).mock(return_value=httpx.Response(200, text="<html></html>"))
 
     db_path = tmp_path / "e2e.db"
     db_url = f"sqlite:///{db_path}"
