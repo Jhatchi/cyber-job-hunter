@@ -1,7 +1,7 @@
 [project]
 name = "Cyber-Job-Hunter"
 version = "0.1.0"
-description = "Automated cyber security job scraper with profile-based scoring — personal portfolio project"
+description = "Solo Python tool that scrapes 19 cybersecurity job sources (BE, LU, EU) with explainable 0-100 profile-based scoring and a Streamlit dashboard"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.11"

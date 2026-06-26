@@ -25,7 +25,7 @@ Automated cybersecurity job aggregator with profile-based scoring and a live Str
 
 ## What it does
 
-- **Scrapes 18 cybersecurity job sources** across Belgium, Luxembourg and the EU (Big4, pure-play cyber, public sector, ENISA, remote aggregators).
+- **Scrapes 19 cybersecurity job sources** across Belgium, Luxembourg and the EU (Big4, pure-play cyber, defense, public sector, ENISA, remote aggregators).
 - **Scores each posting 0 to 100** through a tunable profile (target titles, seniority, languages, location) with a line-by-line breakdown of why the score is what it is.
 - **Surfaces results in a Streamlit dashboard** plus CSV export, with "new since last run" detection and 10+ filters.
 
@@ -53,7 +53,7 @@ Dashboard at `http://localhost:8501`.
 | Python LOC (`src` + `tests` + `dashboard` + `scripts`) | 12 257 |
 | Tests | 357 passing |
 | Coverage on `src/` | 89% (Streamlit UI excluded) |
-| Active scrapers | 18 across 6 categories |
+| Active scrapers | 19 across 7 categories |
 | Type safety | mypy `strict = true` |
 | Security lint | ruff with `S` (bandit) selector |
 | CI | GitHub Actions: ruff + mypy + pytest on every push |
@@ -140,13 +140,14 @@ Rejected (score = 0):
 
 ## Sources
 
-18 active scrapers across 6 categories:
+19 active scrapers across 7 categories:
 
 | Category | Sources |
 |---|---|
 | **Big4 and ESN** | KPMG, Capgemini, Sopra Steria, Accenture, Devoteam, EPAM |
 | **Pure-play cyber** | NVISO, Toreon, Orange Cyberdefense, EASI, Nexova, Cream |
 | **Belgian public sector** | Smals, Actiris, Travaillerpour |
+| **Defense and aerospace** | Thales |
 | **EU institutions** | ENISA |
 | **Aggregators** | Remotive |
 | **Other Belgian tech** | itsme |
@@ -176,6 +177,7 @@ Scraping techniques span REST JSON, RSS, Workday CXS, Next.js `_next/data`, XML 
 | [EPAM](https://careers.epam.com/en/jobs/belgium) | Next.js `_next/data` | BE | Build ID extracted dynamically from `__NEXT_DATA__`. |
 | [Toreon](https://www.toreon.com/jobs/) | HTML | BE | Pure-play cyber consulting, Antwerp HQ. |
 | [ENISA](https://www.enisa.europa.eu/careers) | HTML | EU | EU cybersecurity agency, Athens HQ. |
+| [Thales](https://careers.thalesgroup.com) | HTML (Phenom SSR) | BE | Defense and cyber, client-side BE filter, JSON-LD detail enrichment. |
 
 </details>
 
@@ -228,7 +230,7 @@ Cyber-Job-Hunter/
     scoring.py           0-100 with explainable breakdown
     deduplication.py     SHA-256 content hash
     storage.py           JobRepository (SQLite)
-    scrapers/            base.py + 18 concrete scrapers
+    scrapers/            base.py + 19 concrete scrapers
   dashboard/             Streamlit app, 3 views
   scripts/               init_db.py, run_scrape.py, export_csv.py
   tests/                 357 tests, respx mocks
